@@ -2,7 +2,6 @@
 
 import os
 
-from sklearn import linear_model
 try:
     import numpy as np
 except ImportError as e:
@@ -25,29 +24,33 @@ def lasso(data):
     # 初始化参数
     def init(dim):
         weight = np.zeros(dim)
-        return weight
+        b = 0
+        return weight, b
 
     # 定义lasso损失函数
-    def l1_loss(x, y, w, lamb):
+    def l1_loss(x, y, w, b, lamb):
         samples = x.shape[0]
-        y_hat = np.dot(x, w)
+        y_hat = np.dot(x, w) + b
         loss = np.sum((y_hat - y) ** 2) / samples + lamb * np.sum(abs(w))
         dw = np.dot(x.T, (y_hat - y)) / samples + lamb * np.sign(w)
-        return y_hat, loss, dw
+        db = np.sum((y_hat - y)) / samples
+        return y_hat, loss, dw, db
 
     # 训练过程
-    def lasso_train(x, y, learning_rate = 0.01, epochs = 100):
+    def lasso_train(x, y, learning_rate = 0.1, epochs = 500):
         loss_list = []
-        weight = init(x.shape[1])
+        weight, b = init(x.shape[1])
         for i in range(1, epochs):
-            y_hat, loss, dw = l1_loss(x, y, weight, 0.1)
+            y_hat, loss, dw, db = l1_loss(x, y, weight, b, 0.5)
             weight += -learning_rate * dw
+            b += -learning_rate * db
             loss_list.append(loss)
 
-        return loss_list, weight
+        return loss_list, weight, b
 
-    loss_list, weight = lasso_train(x, y)
-    return loss_list, np.dot(data, weight)
+    loss_list, weight, b = lasso_train(x, y)
+    y_pred = np.dot(data, weight) + b
+    return loss_list, y_pred
 
 def read_data(path='./data/exp02/'):
     x = np.load(path + 'X_train.npy')
@@ -70,5 +73,6 @@ features = np.array([
 labels = np.array([41.2, 37.2, 40.5, 22.3, 28.1, 15.4, 50. , 40.6, 52.5, 63.9])
 
 loss_list, y_pred = lasso(features)
+print(loss_list)
 print(y_pred, labels)
 '''
