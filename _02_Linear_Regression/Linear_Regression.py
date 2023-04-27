@@ -10,49 +10,53 @@ except ImportError as e:
 
 
 def ridge(data):
-    lam = 0.5
+    lam = 0.05
     x, y = read_data()
     weight = np.dot(np.linalg.inv(np.dot(x.T, x) + np.eye(x.shape[1]) * lam), np.dot(x.T, y))
     return data @ weight
-    
+
 def lasso(data):
     x, y = read_data()
     # 归一化
-    x = (x - np.mean(x, axis=0)) / np.std(x, axis=0)
-    y = (y - np.mean(y)) / np.std(y)
+    x = (x - np.min(x, axis=0)) / (np.max(x, axis=0) - np.min(x, axis=0))
+    #y = (y - np.min(y)) / (np.max(y) - np.min(y))
 
     # 初始化参数
     def init(dim):
         weight = np.zeros(dim)
-        b = 0
-        return weight, b
+        return weight
 
     # 定义lasso损失函数
-    def l1_loss(x, y, w, b, lamb):
+    def l1_loss(x, y, w, lamb):
         samples = x.shape[0]
-        y_hat = np.dot(x, w) + b
+        y_hat = np.dot(x, w)
         loss = np.sum((y_hat - y) ** 2) / samples + lamb * np.sum(abs(w))
         dw = np.dot(x.T, (y_hat - y)) / samples + lamb * np.sign(w)
-        db = np.sum((y_hat - y)) / samples
-        return y_hat, loss, dw, db
+        return y_hat, loss, dw
 
     # 训练过程
     def lasso_train(x, y, learning_rate = 0.1, epochs = 500):
         loss_list = []
-        weight, b = init(x.shape[1])
+        weight = init(x.shape[1])
         for i in range(1, epochs):
-            y_hat, loss, dw, db = l1_loss(x, y, weight, b, 0.5)
-            weight += -learning_rate * dw
-            b += -learning_rate * db
+            y_hat, loss, dw = l1_loss(x, y, weight, 0.05)
+            weight += (-learning_rate * dw)
+            # b += -learning_rate * db
             loss_list.append(loss)
 
-        return loss_list, weight, b
+        return loss_list, weight
 
-    loss_list, weight, b = lasso_train(x, y)
-    y_pred = np.dot(data, weight) + b
+    loss_list, weight = lasso_train(x, y)
+
+    x, y = read_data()
+    data = (data - np.min(x, axis=0)) / (np.max(x, axis=0) - np.min(x, axis=0))
+    y_pred = np.dot(data, weight)
+    #y_pred = np.min(y) + y_pred * (np.max(y) - np.min(y))
+
     return loss_list, y_pred
 
-def read_data(path='./data/exp02/'):
+
+def read_data(path='../data/exp02/'):
     x = np.load(path + 'X_train.npy')
     y = np.load(path + 'y_train.npy')
     return x, y
@@ -73,6 +77,7 @@ features = np.array([
 labels = np.array([41.2, 37.2, 40.5, 22.3, 28.1, 15.4, 50. , 40.6, 52.5, 63.9])
 
 loss_list, y_pred = lasso(features)
-print(loss_list)
 print(y_pred, labels)
+print(ridge(features), labels)
+
 '''
