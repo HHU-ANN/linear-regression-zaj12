@@ -10,9 +10,9 @@ except ImportError as e:
 
 
 def ridge(data):
-    lam = 0.05
+    lam = 0.2
     x, y = read_data()
-    x = np.concatenate((np.ones((404, 1)), x), axis=1)
+    #x = np.concatenate((np.ones((404, 1)), x), axis=1)
     weight = np.dot(np.linalg.inv(np.dot(x.T, x) + np.eye(x.shape[1]) * lam), np.dot(x.T, y))
     return data @ weight
     
