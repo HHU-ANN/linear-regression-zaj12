@@ -16,8 +16,8 @@ def ridge(data):
     weight = np.dot(np.linalg.inv(np.dot(x.T, x) + np.eye(x.shape[1]) * lam), np.dot(x.T, y))
     return data @ weight
     
-def lasso(x, y):
-    pass
+def lasso(data):
+    return ridge(data)
 
 def read_data(path='./data/exp02/'):
     x = np.load(path + 'X_train.npy')
