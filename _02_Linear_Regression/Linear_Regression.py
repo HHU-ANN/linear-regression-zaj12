@@ -56,7 +56,7 @@ def lasso(data):
     return y_pred
 
 
-def read_data(path='../data/exp02/'):
+def read_data(path='./data/exp02/'):
     x = np.load(path + 'X_train.npy')
     y = np.load(path + 'y_train.npy')
     return x, y
