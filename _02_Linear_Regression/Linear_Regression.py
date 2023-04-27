@@ -53,10 +53,10 @@ def lasso(data):
     y_pred = np.dot(data, weight)
     #y_pred = np.min(y) + y_pred * (np.max(y) - np.min(y))
 
-    return loss_list, y_pred
+    return y_pred
 
 
-def read_data(path='./data/exp02/'):
+def read_data(path='../data/exp02/'):
     x = np.load(path + 'X_train.npy')
     y = np.load(path + 'y_train.npy')
     return x, y
@@ -76,8 +76,7 @@ features = np.array([
     ])
 labels = np.array([41.2, 37.2, 40.5, 22.3, 28.1, 15.4, 50. , 40.6, 52.5, 63.9])
 
-loss_list, y_pred = lasso(features)
+y_pred = lasso(features)
 print(y_pred, labels)
 print(ridge(features), labels)
-
 '''
